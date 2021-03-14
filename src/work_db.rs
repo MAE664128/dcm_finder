@@ -6,25 +6,55 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
 
-#[derive(Serialize, Deserialize)]
+
+
+#[derive(Serialize, Deserialize,Debug)]
 pub struct Pa {
-    patient_id: String,
-    birth_date: String,
-    sex: String,
-    age: String,
-    studies: Vec<St>,
+    pub patient_id: String,
+    pub birth_date: String,
+    pub sex: String,
+    pub age: String,
+    pub studies: Vec<St>,
 }
 
-#[derive(Serialize, Deserialize)]
+impl Pa {
+    pub fn count_studies(&self) -> usize {
+        self.studies.len()
+    }
+
+    pub fn count(&self) -> (usize, usize, usize) {
+        let len_studies = self.count_studies();
+        let mut len_series = 0;
+        let mut len_paths = 0;
+        for study in &self.studies {
+            let (tmp_len_series, tmp_len_paths) = study.count();
+            len_series = len_series + tmp_len_series;
+            len_paths = len_paths + tmp_len_paths;
+        };
+        (len_studies, len_series, len_paths)
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct St {
     pub study_uid: String,
     pub study_date: String,
     pub study_time: String,
     pub description: String,
-    series: Vec<Se>,
+    pub series: Vec<Se>,
 }
 
-#[derive(Serialize, Deserialize)]
+impl St {
+    pub fn count_series(&self) -> usize {
+        self.series.len()
+    }
+
+    pub fn count(&self) -> (usize, usize){
+        (self.count_series(), self.series.iter().map(|series|{series.count_paths()}).sum())
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Se {
     pub series_uid: String,
     pub modality: String,
@@ -41,8 +71,16 @@ pub struct Se {
     pub exposuretime: String,
     pub rescaleintercept: String,
     pub description: String,
-    paths: Vec<String>,
+    pub paths: Vec<String>,
 }
+
+impl Se {
+    pub fn count_paths(&self) -> usize {
+        self.paths.len()
+    }
+}
+
+
 
 
 pub trait Dcm {
@@ -58,7 +96,8 @@ pub trait Dcm {
     fn get_studies_as_struct(&self, patient_id: &String) -> Result<Vec<St>, Error>;
     fn get_series_as_struct(&self, study_uid: &String) -> Result<Vec<Se>, Error>;
     fn get_paths_as_vec(&self, series_uid: &String) -> Result<Vec<String>, Error>;
-    fn export_as_json(&self) -> Result<(), Error>;
+    fn print_count(vec_patients: &Vec<Pa>) -> Result<()>;
+    fn export_result(&self) -> Result<(), Error>;
 }
 
 impl Dcm for Connection {
@@ -133,7 +172,6 @@ impl Dcm for Connection {
             NO_PARAMS,
         )?;
 
-        println!("Table created successful");
         Ok(conn)
     }
 
@@ -301,10 +339,25 @@ impl Dcm for Connection {
         Ok(paths)
     }
 
-    fn export_as_json(&self) -> Result<()> {
-        let mut dict = HashMap::new();
+    fn print_count(vec_patients: &Vec<Pa>) -> Result<()> {
+        println!("Among them, patients were found: {}", &vec_patients.len());
+        for (i, patient) in vec_patients.iter().enumerate() {
+            let tmp_tuple = patient.count();
+            println!("\t{}. {:>15}--->\t\tStudies:\t{},\tSeries:\t{},\tFiles:\t{}",
+                     i+1, patient.patient_id, tmp_tuple.0, tmp_tuple.1, tmp_tuple.2)
+        }
+        Ok(())
+    }
 
+    fn export_result(&self) -> Result<()> {
+        let mut dict = HashMap::new();
         dict.insert("result", self.get_patients_as_struct()?);
+        match dict.get(&"result") {
+            Some(vec_patients) => {
+                Connection::print_count(vec_patients);
+            },
+            _ => {println!("No patients found")}
+        };
         let j = serde_json::to_string(&dict).unwrap();
         let mut file = File::create("result.json").unwrap();
         file.write_all(j.as_bytes()).unwrap();

@@ -35,7 +35,7 @@ fn find_all_files(dir_path: &path::PathBuf) -> Vec<path::PathBuf> {
 /// Поиск не выполняется в скрытых директориях
 pub fn find_dcm_files(dir_path: &path::PathBuf) {
     let paths = find_all_files(dir_path);
-    println!("Всего найдено: {} файлов", paths.len());
+    println!("Total files found: {}", paths.len());
     let conn = work_db::Connection::create_dcm_tables(true).unwrap();
     let contents = Arc::new(Mutex::new(conn));
     paths.par_iter().progress_count(paths.len().try_into().unwrap()).for_each(|path| {
@@ -47,5 +47,5 @@ pub fn find_dcm_files(dir_path: &path::PathBuf) {
             Err(_) => {}
         };
     });
-    contents.lock().unwrap().export_as_json();
+    contents.lock().unwrap().export_result();
 }
