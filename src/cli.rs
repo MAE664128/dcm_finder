@@ -44,6 +44,7 @@ pub fn start_cli() {
             dir_scan::find_dcm_files(&path_to_dir_for_search);
         }
         Command::Depersonalize { path_to_dir_for_search, path_to_dir_for_save } => {
+            dir_scan::de_identification_dcm_files(&path_to_dir_for_search, &path_to_dir_for_save);
             println!("{:?} \n {:?}", path_to_dir_for_search, path_to_dir_for_save)
         }
     };

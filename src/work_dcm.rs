@@ -1,11 +1,12 @@
 use dicom::core::Tag;
-// use dicom::core::dicom_value;
-// use dicom::core::value as dcm_core_value;
-// use dicom::object::mem::{InMemElement};
+use dicom::core::dicom_value;
+use dicom::core::value as dcm_core_value;
+use dicom::object::mem::{InMemElement};
 use dicom::object::open_file as dcm_core_open_file;
 
 use dicom::object::{DefaultDicomObject, Result};
-use std::path::Path;
+use std::path;
+use std::collections::HashMap;
 
 
 pub struct MetaDcm<'a> {
@@ -98,28 +99,63 @@ fn get_value_for_tag(obj: &DefaultDicomObject, tag: Tag) -> String {
     }
 }
 
+pub fn depersonalize_obj(obj: &mut DefaultDicomObject) {
+    let mut tags_for_depersonalization: HashMap<Tag, &str> = HashMap::new();
+    // Patient's Name Attribute
+    tags_for_depersonalization.insert(Tag(0x0010, 0x0010), "Unknown Name");
+    // Patient's Birth Date Attribute
+    tags_for_depersonalization.insert(Tag(0x0010, 0x0030), "19000101");
+    // Patient's Birth Time Attribute
+    tags_for_depersonalization.insert(Tag(0x0010, 0x0032), "084545");
+    // Person's Address Attribute
+    tags_for_depersonalization.insert(Tag(0x0040, 0x1102), "Unknown Address");
+    // Patient's Death Date in Alternative Calendar Attribute
+    tags_for_depersonalization.insert(Tag(0x0010, 0x0034), "19000101");
+    // Patient Comments Attribute
+    tags_for_depersonalization.insert(Tag(0x0010, 0x4000), "Unknown Comments");
+    // Person's Phone
+    tags_for_depersonalization.insert(Tag(0x0040, 0x1102), "Unknown Phone");
+    // Institution Address Attribute
+    tags_for_depersonalization.insert(Tag(0x0008, 0x0081), "Unknown Address");
+    // Institution Name Attribute
+    tags_for_depersonalization.insert(Tag(0x0008, 0x0080), "Unknown Attribute");
+    // Admission ID Attribute
+    tags_for_depersonalization.insert(Tag(0x0038, 0x0010), "Unknown ID");
+    // Device Serial Number Attribute
+    tags_for_depersonalization.insert(Tag(0x0018, 0x1000), "Unknown Serial Number");
+    // Device Description Attribute
+    tags_for_depersonalization.insert(Tag(0x0050, 0x0020), "Unknown Description");
+
+    for (&tag, &values) in tags_for_depersonalization.iter() {
+        replace_element_in_dcm_obj(obj, tag, values);
+    };
+}
+
 /// Изменяет значение тега  объекта на новое значение
 /// В случаи отсутствия тега в объекте вставка не выполняется.
-// fn replace_element_in_dcm_obj(obj: &mut DefaultDicomObject, tag: Tag, values: &str) {
-//     match obj.element(tag) {
-//         Ok(element) => {
-//             let value_dcm = dicom_value!(Strs,  [values]);
-//
-//             let value_dcm =  dcm_core_value::Value::from(value_dcm);
-//             // : DataElement<InMemDicomObject<StandardDataDictionary>, InMemFragment>
-//             let new_el = InMemElement::new(
-//                 tag,
-//                 element.vr(),
-//                 value_dcm
-//             );
-//             obj.put(new_el).unwrap();
-//         },
-//         _ => { }
-//     };
-// }
+fn replace_element_in_dcm_obj(obj: &mut DefaultDicomObject, tag: Tag, values: &str) {
+    match obj.element(tag) {
+        Ok(element) => {
+            let value_dcm = dicom_value!(Strs,  [values]);
 
+            let value_dcm =  dcm_core_value::Value::from(value_dcm);
+            // : DataElement<InMemDicomObject<StandardDataDictionary>, InMemFragment>
+            let new_el = InMemElement::new(
+                tag,
+                element.vr(),
+                value_dcm
+            );
+            obj.put(new_el).unwrap();
+        },
+        _ => { }
+    };
+}
 
-pub fn read_dcm(path: &Path) -> Result<DefaultDicomObject> {
+pub fn save_dcm(obj: &DefaultDicomObject, save_in: String) {
+    obj.write_to_file(path::Path::new(save_in.as_str()));
+}
+
+pub fn read_dcm(path: &path::Path) -> Result<DefaultDicomObject> {
     dcm_core_open_file(path)
 }
 

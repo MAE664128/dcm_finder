@@ -21,7 +21,7 @@ SUBCOMMANDS:
 **Function:**
 
 - Search for DICOM files in the specified directory
-- De-identification DICOM files in the specified directory (WIP)
+- De-identification DICOM files in the specified directory
 - Export metadata about found DICOM files to JSON format
 
 **Find**
@@ -58,6 +58,17 @@ Among them, patients were found: 5                                              
         4.    SVR_2068053 --->          Studies:        1,      Series: 2,      Files:  548
         5.    SVR_1686009 --->          Studies:        1,      Series: 3,      Files:  661
 command took 0:0:12.97 (12.97s total)
+
+PS H:\> .\timecmd dcm_findler depersonalize -p C:\...\MedImg -s C:\...\NewMedImg
+Total files found: 140781
+Among them, patients were found: 5                                                                                     8
+        1.                --->          Studies:        483,    Series: 952,    Files:  15338
+        2.    SVR_2068053 --->          Studies:        1,      Series: 2,      Files:  548
+        3.    SVR_1686009 --->          Studies:        1,      Series: 3,      Files:  661
+        4.    SVR_1786577 --->          Studies:        1,      Series: 1,      Files:  451
+        5.    SVR_1516417 --->          Studies:        1,      Series: 6,      Files:  772
+command took 0:0:23.95 (23.95s total)
+
 ```
 ```json
 {

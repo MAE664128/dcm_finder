@@ -15,6 +15,7 @@ indicatif = { version = "*", features = ["rayon"] }
 dicom = "0.3.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.64"
+smallvec = "1.6.1"
 
 [dependencies.rusqlite]
 version = "0.24.2"

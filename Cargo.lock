@@ -233,6 +233,7 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
+ "smallvec",
  "structopt 0.3.21",
  "walkdir",
 ]
