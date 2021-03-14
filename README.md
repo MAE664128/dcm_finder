@@ -50,8 +50,14 @@ Example:
 *(AMD Ryzen 7 3700X 8-Core Processor Samsung SSD 970 EVO Plus 1TB)*
 ```commandline
 H:\> .\timecmd dcm_study_store find -p C:\...\MedImg
-Всего найдено: 142292 файлов
-command took 0:0:12.18 (12.18s total) 
+Total files found: 140781
+Among them, patients were found: 5                                                                                     1
+        1.    NoPatientID --->          Studies:        483,    Series: 952,    Files:  15338
+        2.    SVR_1786577 --->          Studies:        1,      Series: 1,      Files:  451
+        3.    SVR_1516417 --->          Studies:        1,      Series: 6,      Files:  772
+        4.    SVR_2068053 --->          Studies:        1,      Series: 2,      Files:  548
+        5.    SVR_1686009 --->          Studies:        1,      Series: 3,      Files:  661
+command took 0:0:12.97 (12.97s total)
 ```
 ```json
 {
