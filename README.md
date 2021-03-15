@@ -3,7 +3,7 @@
 **Finder of study in dicom(CT) format, with the function of de-identification.**
 
 ---
-
+**CLI:**
 ```commandline
 USAGE:
     dcm_finder <SUBCOMMAND>

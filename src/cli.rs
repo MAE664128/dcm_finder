@@ -1,9 +1,7 @@
-pub use structopt::StructOpt;
 use std::path;
-// use quicli::prelude::*;
+use std::time;
 use crate::dir_scan;
-// use crate::work_db;
-// use crate::work_db::Dcm;
+pub use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "dcm finder", about = "Finder of study in dicom format, with the function of de-identification.")]
@@ -38,14 +36,15 @@ enum Command {
 
 pub fn start_cli() {
     let args = Cli::from_args();
-
+    let before = time::Instant::now();
     match &args.action {
         Command::Find { path_to_dir_for_search } => {
             dir_scan::find_dcm_files(&path_to_dir_for_search);
         }
         Command::Depersonalize { path_to_dir_for_search, path_to_dir_for_save } => {
             dir_scan::de_identification_dcm_files(&path_to_dir_for_search, &path_to_dir_for_save);
-            println!("{:?} \n {:?}", path_to_dir_for_search, path_to_dir_for_save)
         }
     };
+    println!("Elapsed time to complete: {:.2?}", before.elapsed());
+
 }

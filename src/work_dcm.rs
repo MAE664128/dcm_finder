@@ -151,8 +151,9 @@ fn replace_element_in_dcm_obj(obj: &mut DefaultDicomObject, tag: Tag, values: &s
     };
 }
 
-pub fn save_dcm(obj: &DefaultDicomObject, save_in: String) {
-    obj.write_to_file(path::Path::new(save_in.as_str()));
+pub fn save_dcm(obj: &DefaultDicomObject, save_in: &String) ->Result<()> {
+    obj.write_to_file(path::Path::new(save_in.as_str()))?;
+    Ok(())
 }
 
 pub fn read_dcm(path: &path::Path) -> Result<DefaultDicomObject> {

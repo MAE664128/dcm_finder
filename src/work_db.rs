@@ -96,8 +96,8 @@ pub trait Dcm {
     fn get_studies_as_struct(&self, patient_id: &String) -> Result<Vec<St>, Error>;
     fn get_series_as_struct(&self, study_uid: &String) -> Result<Vec<Se>, Error>;
     fn get_paths_as_vec(&self, series_uid: &String) -> Result<Vec<String>, Error>;
-    fn print_count(vec_patients: &Vec<Pa>) -> Result<()>;
-    fn export_result(&self) -> Result<(), Error>;
+    fn print_count(vec_patients: &Vec<Pa>);
+    fn export_result(&self) -> Result<()>;
 }
 
 impl Dcm for Connection {
@@ -212,7 +212,7 @@ impl Dcm for Connection {
             }
             Err(_) => { false }
         } {
-            self.insert_path(meta_dcm.get_path_ref()).unwrap();
+            self.insert_path(meta_dcm.get_path_ref()).unwrap_or_else(|_|{});
         }
     }
 
@@ -339,14 +339,13 @@ impl Dcm for Connection {
         Ok(paths)
     }
 
-    fn print_count(vec_patients: &Vec<Pa>) -> Result<()> {
+    fn print_count(vec_patients: &Vec<Pa>){
         println!("Among them, patients were found: {}", &vec_patients.len());
         for (i, patient) in vec_patients.iter().enumerate() {
             let tmp_tuple = patient.count();
             println!("\t{}. {:>15}--->\t\tStudies:\t{},\tSeries:\t{},\tFiles:\t{}",
                      i+1, patient.patient_id, tmp_tuple.0, tmp_tuple.1, tmp_tuple.2)
         }
-        Ok(())
     }
 
     fn export_result(&self) -> Result<()> {
@@ -358,9 +357,20 @@ impl Dcm for Connection {
             },
             _ => {println!("No patients found")}
         };
-        let j = serde_json::to_string(&dict).unwrap();
-        let mut file = File::create("result.json").unwrap();
-        file.write_all(j.as_bytes()).unwrap();
+        let j = serde_json::to_string(&dict).unwrap_or_default();
+        match File::create("result_dcm_finder.json") {
+            Ok(mut file) => {
+                match file.write_all(j.as_bytes()){
+                    Ok(_) => {}
+                    Err(e) => {
+                        eprintln!("Error write result in file (as json): {:?}", e);
+                    }
+                }
+            }
+            Err(error) => {
+                eprintln!("Error create result file (as json): {:?}", error)
+            }
+        }
         Ok(())
     }
 }

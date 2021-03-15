@@ -3,11 +3,10 @@ mod dir_scan;
 mod work_dcm;
 mod work_db;
 
-use cli::start_cli;
+use cli as dcm_finder_cli;
 
 
 fn main() -> Result<(), ()> {
-    start_cli();
-
+    dcm_finder_cli::start_cli();
     Ok(())
 }
