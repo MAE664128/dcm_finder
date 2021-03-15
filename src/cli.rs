@@ -39,10 +39,10 @@ pub fn start_cli() {
     let before = time::Instant::now();
     match &args.action {
         Command::Find { path_to_dir_for_search } => {
-            dir_scan::find_dcm_files(&path_to_dir_for_search);
+            dir_scan::scanning(&path_to_dir_for_search, true,None);
         }
         Command::Depersonalize { path_to_dir_for_search, path_to_dir_for_save } => {
-            dir_scan::de_identification_dcm_files(&path_to_dir_for_search, &path_to_dir_for_save);
+            dir_scan::scanning(&path_to_dir_for_search, false, Some(&path_to_dir_for_save));
         }
     };
     println!("Elapsed time to complete: {:.2?}", before.elapsed());

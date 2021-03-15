@@ -41,39 +41,7 @@ fn find_all_files(dir_path: &path::PathBuf) -> Vec<path::PathBuf> {
 /// Выполняет рекурсивный поиск всех DICOM файлов в директории с
 /// параллельной итерацией при выполнении операции чтения
 /// Поиск не выполняется в скрытых директориях
-pub fn find_dcm_files(dir_path: &path::PathBuf) {
-    let paths = find_all_files(dir_path);
-    println!("Total files found: {}", paths.len());
-
-    match work_db::Connection::create_dcm_tables(true) {
-        Ok(conn) => {
-            let contents = Arc::new(Mutex::new(conn));
-            paths.par_iter()
-                .progress_count(paths.len().try_into().unwrap_or_default())
-                .for_each(|path| {
-                    match work_dcm::read_dcm(&path.as_path()) {
-                        Ok(dcm_obj) => {
-                            let meta_dcm = work_dcm::MetaDcm::from(
-                                &dcm_obj,
-                                &path.as_path().to_str().unwrap_or_default(),
-                            );
-                            add_dcm_in_contents(&contents, &meta_dcm);
-                        }
-                        Err(_) => {}
-                    };
-                });
-            export_res_as_json(contents);
-        }
-        Err(error) => {
-            eprintln!("Error create data base in memory: {:?}", error)
-        }
-    }
-}
-
-/// Выполняет рекурсивный поиск всех DICOM файлов в директории с
-/// параллельной итерацией при выполнении операции чтения
-/// Поиск не выполняется в скрытых директориях
-pub fn de_identification_dcm_files(find_in: &path::PathBuf, save_in: &path::PathBuf) {
+pub fn scanning(find_in: &path::PathBuf, only_find: bool, save_in: Option<&path::PathBuf>) {
     let paths = find_all_files(find_in);
     println!("Total files found: {}", paths.len());
 
@@ -91,13 +59,16 @@ pub fn de_identification_dcm_files(find_in: &path::PathBuf, save_in: &path::Path
                             );
                             add_dcm_in_contents(&contents, &meta_dcm);
 
-                            let new_save_in = create_new_path(&meta_dcm, save_in);
-                            let mut dcm_obj = dcm_obj;
-                            work_dcm::depersonalize_obj(&mut dcm_obj);
-                            work_dcm::save_dcm(&dcm_obj, &new_save_in).unwrap_or_else(|e| {
-                                eprintln!("Error saving depersonalized dicom [path: {}]: \n {:?} ",
-                                          &path.as_path().to_str().unwrap_or_default(), e );
-                            });
+                            if !only_find && save_in.is_some() {
+                                let new_save_in = create_new_path(&meta_dcm, save_in.unwrap());
+                                let mut dcm_obj = dcm_obj;
+                                work_dcm::depersonalize_obj(&mut dcm_obj);
+                                work_dcm::save_dcm(&dcm_obj, &new_save_in).unwrap_or_else(|e| {
+                                    eprintln!("Error saving depersonalized dicom [path: {}]: \n {:?} ",
+                                              &path.as_path().to_str().unwrap_or_default(), e);
+                                });
+                            }
+
                         }
                         Err(_) => {}
                     };
