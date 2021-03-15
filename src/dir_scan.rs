@@ -8,15 +8,10 @@ use indicatif::ParallelProgressIterator;
 use rayon::iter::{ParallelIterator, IntoParallelRefIterator};
 use crate::work_db;
 use crate::work_db::Dcm;
+use rand::Rng;
 
 use crate::work_dcm;
-// use std::ffi::OsStr;
-// use rand;
-// use rand::Rng;
-// use rand::distributions;
-// use std::io::Error;
-// use std::fs::ReadDir;
-// use rayon::join_context;
+
 
 /// Проверяет, является ли директория скрытой
 fn is_hidden(entry: &DirEntry) -> bool {
@@ -110,6 +105,11 @@ fn create_new_path(meta_dcm: &work_dcm::MetaDcm, save_in: &path::PathBuf) -> Str
         }
     };
     let count_files = count_files_in_dir(&new_path);
+    let mut rng = rand::thread_rng();
+    let n1: usize = rng.gen();
+    let count_files = count_files + "_";
+    let count_files = count_files + n1.to_string().as_str();
+
     let file_name = path::Path::new(count_files.as_str());
 
     new_path.join(path::Path::new(file_name)).to_str().unwrap().trim().to_string()
