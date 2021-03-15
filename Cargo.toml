@@ -1,5 +1,5 @@
 [package]
-name = "dcm_findler"
+name = "dcm_finder"
 version = "0.1.0"
 authors = ["Matkin Alexandr <mae664128@gmail.com>"]
 edition = "2018"
