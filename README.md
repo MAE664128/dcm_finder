@@ -1,4 +1,5 @@
 # DICOM finder &emsp; 
+*This project is for educational purposes only.*
 
 **Finder of study in dicom(CT) format, with the function of de-identification.**
 
