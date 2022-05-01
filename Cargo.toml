@@ -1,23 +1,23 @@
 [package]
 name = "dcm_finder"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Matkin Alexandr <mae664128@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 quicli = "0.4.0"
-structopt = "0.3.21"
-walkdir = "2.3.1"
-rayon = "1.5.0"
+structopt = "0.3.26"
+walkdir = "2.3.2"
+rayon = "1.5.1"
 indicatif = { version = "*", features = ["rayon"] }
-dicom = "0.3.0"
+dicom = "0.5.0"
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.64"
-smallvec = "1.6.1"
-rand = "0.8.3"
+serde_json = "1.0.78"
+smallvec = "1.8.0"
+rand = "0.8.4"
 
 [dependencies.rusqlite]
-version = "0.24.2"
+version = "0.26.3"
 features = ["bundled"]
